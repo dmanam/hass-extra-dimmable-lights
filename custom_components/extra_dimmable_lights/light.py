@@ -186,7 +186,7 @@ class ExtraDimmableLightGroup(GroupEntity, LightEntity):
             }]
 
         self._attr_name = name
-        self._attr_extra_state_attributes = {ATTR_ENTITY_ID: self._entity_ids}
+        self._attr_extra_state_attributes = {"_"+ATTR_ENTITY_ID: self._entity_ids}
         self._attr_unique_id = unique_id
 
     async def async_added_to_hass(self) -> None:
