@@ -147,9 +147,10 @@ class ExtraDimmableLightGroup(GroupEntity, LightEntity):
         group_min_intensities = [len(group[CONF_ENTITIES]) * group[CONF_MIN_INTENSITY] for group in ranked_groups]
         min_total_intensity = sum(group_min_intensities)
         self._max_intensity = sum(len(group[CONF_ENTITIES]) * group[CONF_MAX_INTENSITY] for group in ranked_groups)
+        self._min_intensity = ranked_groups[0][CONF_MIN_INTENSITY]
         self._brightness_key = []
         for bri in range(0, 256):
-            target = max(bri - 3, 0) / 252 * self._max_intensity
+            target = max(bri - 3, 0) / 252 * (self._max_intensity - self._min_intensity) + self._min_intensity
             if target >= min_total_intensity:
                 self._brightness_key += [{"forward": True}]
                 continue
@@ -331,7 +332,7 @@ class ExtraDimmableLightGroup(GroupEntity, LightEntity):
             if state.state == STATE_ON and (bri := state.attributes.get(ATTR_BRIGHTNESS)) is not None:
                 minint, maxint = self._bounds[eid]
                 current_intensity += (maxint - minint) * max(bri - 3, 0) / 252 + minint
-        self._attr_brightness = round(current_intensity / self._max_intensity * 255)
+        self._attr_brightness = round((current_intensity - self._min_intensity) / (self._max_intensity - self._min_intensity) * 252) + 3
 
         self._attr_hs_color = reduce_attribute(
             on_states, ATTR_HS_COLOR, reduce=mean_tuple
