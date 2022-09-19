@@ -1,0 +1,12 @@
+{
+  "domain": "extra_dimmable_lights",
+  "name": "Extra Dimmable Lights",
+  "documentation": "https://github.com/dmanam/hass-extra-dimmable-lights",
+  "issue_tracker": "https://github.com/dmanam/hass-extra-dimmable-lights",
+  "config_flow": false,
+  "dependencies": [],
+  "codeowners": ["@dmanam"],
+  "version": "0.0.1",
+  "requirements": [],
+  "iot_class": "calculated"
+}
