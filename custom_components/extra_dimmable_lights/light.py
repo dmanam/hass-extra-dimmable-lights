@@ -239,17 +239,17 @@ class ExtraDimmableLightGroup(GroupEntity, LightEntity):
             eids = self._ranking[group]
             totbulbs = len(eids)
             on_eids = [eid for eid in eids if self._states[eid]]
-            off_eids = [eid for eid in eids if not self._states[eid]]
+            off_eids = [eid for eid in eids if eid not in on_eids]
             if len(on_eids) < nbulbs:
                 diff = nbulbs - len(on_eids)
                 moved = random.choices(off_eids, k=diff)
                 on_eids += moved
-                off_eids = list(set(off_eids) - set(moved))
+                off_eids = [eid for eid in off_eids if eid not in moved]
             elif len(on_eids) > nbulbs:
                 diff = len(on_eids) - nbulbs
                 moved = random.choices(on_eids, k=diff)
                 off_eids += moved
-                on_eids = list(set(on_eids) - set(moved))
+                on_eids = [eid for eid in on_eids if eid not in moved]
             min_eids = [eid for group in self._ranking[:group] for eid in group]
             off_eids += [eid for group in self._ranking[group+1:] for eid in group]
 
@@ -267,27 +267,24 @@ class ExtraDimmableLightGroup(GroupEntity, LightEntity):
 
             _LOGGER.debug("Processed turn_on command: %s", data)
 
-            await self.hass.services.async_call(
-                light.DOMAIN,
-                SERVICE_TURN_OFF,
-                off_data,
-                blocking=True,
-                context=self._context,
-            )
-            await self.hass.services.async_call(
-                light.DOMAIN,
-                SERVICE_TURN_ON,
-                min_data,
-                blocking=True,
-                context=self._context,
-            )
-            await self.hass.services.async_call(
+            self.hass.async_create_task(self.hass.services.async_call(
                 light.DOMAIN,
                 SERVICE_TURN_ON,
                 on_data,
-                blocking=True,
                 context=self._context,
-            )
+            ))
+            self.hass.async_create_task(self.hass.services.async_call(
+                light.DOMAIN,
+                SERVICE_TURN_ON,
+                min_data,
+                context=self._context,
+            ))
+            self.hass.async_create_task(self.hass.services.async_call(
+                light.DOMAIN,
+                SERVICE_TURN_OFF,
+                off_data,
+                context=self._context,
+            ))
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Forward the turn_off command to all lights in the light group."""
