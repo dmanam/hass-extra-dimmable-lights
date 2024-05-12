@@ -50,7 +50,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from homeassistant.components.group import GroupEntity
+from homeassistant.components.group.entity import GroupEntity
 from homeassistant.components.group.util import find_state_attributes, mean_tuple, reduce_attribute
 
 from .const import *
